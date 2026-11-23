@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Avisos</title>
+<link rel="manifest" href="manifest.json?v=3">
+<link rel="icon" href="icono-192.png">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+  html, body { background: #000; color: #eee; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent; }
+  body { padding: env(safe-area-inset-top) 0 calc(24px + env(safe-area-inset-bottom)); min-height: 100dvh; }
+  header { position: sticky; top: 0; z-index: 5; background: #000; display: flex; align-items: center;
+    gap: 8px; padding: 10px 12px; border-bottom: 1px solid #222; }
+  header a { color: #eee; text-decoration: none; font-size: 15px; padding: 6px 8px; border-radius: 8px; }
+  header h1 { font-size: 16px; font-weight: 600; margin-left: auto; margin-right: 8px; }
+
+  section { margin: 14px 12px; background: #111; border: 1px solid #222; border-radius: 14px; padding: 14px; }
+  section h2 { font-size: 13px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 10px; }
+  .fila { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+  .fila + .fila { border-top: 1px solid #1d1d1d; }
+  .fila .txt { flex: 1; font-size: 15px; }
+  .fila .sub { display: block; font-size: 12.5px; color: #888; margin-top: 2px; }
+  button.b { background: #1f6feb; color: #fff; border: 0; border-radius: 10px; font: inherit; font-size: 14px; padding: 9px 14px; }
+  button.b.gris { background: #262626; color: #ddd; }
+  button.b:disabled { opacity: .5; }
+  .estado { font-size: 14px; padding: 10px 12px; border-radius: 10px; margin-bottom: 10px; }
+  .estado.on { background: #0f2e1d; color: #6fdc9c; }
+  .estado.off { background: #222; color: #aaa; }
+
+  .seg { display: flex; background: #1a1a1a; border-radius: 10px; padding: 3px; margin-bottom: 10px; }
+  .seg button { flex: 1; background: none; border: 0; color: #aaa; font: inherit; font-size: 14px; padding: 8px 4px; border-radius: 8px; }
+  .seg button.activa { background: #333; color: #fff; }
+  input[type=time] { background: #1a1a1a; color: #eee; border: 1px solid #333; border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 15px; color-scheme: dark; }
+  .interruptor { position: relative; width: 46px; height: 28px; flex: none; }
+  .interruptor input { opacity: 0; width: 0; height: 0; }
+  .interruptor span { position: absolute; inset: 0; background: #333; border-radius: 99px; transition: .2s; }
+  .interruptor span::before { content: ""; position: absolute; width: 22px; height: 22px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+  .interruptor input:checked + span { background: #30a46c; }
+  .interruptor input:checked + span::before { transform: translateX(18px); }
+
+  #eventos h3 { font-size: 13px; color: #ccc; margin: 14px 0 8px; text-transform: capitalize; }
+  #eventos h3:first-child { margin-top: 0; }
+  .ev { display: flex; gap: 10px; align-items: center; padding: 6px; border-radius: 10px; color: inherit; text-decoration: none; }
+  .ev + .ev { margin-top: 4px; }
+  .ev img { width: 128px; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; background: #222; flex: none; }
+  .ev .txt { font-size: 14.5px; }
+  .ev .sub { display: block; font-size: 12.5px; color: #888; margin-top: 3px; }
+  .ev.dudoso { opacity: .55; }
+  .ev.destacado { background: #1f6feb33; }
+  .vacio { color: #888; font-size: 14px; }
+
+  /* editor de zona */
+  #editor { position: fixed; inset: 0; background: #000; z-index: 20; display: none; flex-direction: column; }
+  #editor.abierto { display: flex; }
+  #editor .ayuda { padding: 12px 14px; font-size: 14px; color: #bbb; }
+  #lienzo { position: relative; width: 100%; aspect-ratio: 16/9; background: #111; touch-action: none; }
+  #lienzo img { width: 100%; height: 100%; display: block; }
+  #lienzo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #editor .botones { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 14px; }
+  #editor .botones .der { margin-left: auto; display: flex; gap: 8px; }
+  #editor { overflow-y: auto; }
+  #editor .campos { display: flex; flex-direction: column; gap: 10px; padding: 4px 14px 6px; }
+  #editor .campos label { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #aaa; }
+  #editor .campos input, #editor .campos select { flex: 1; min-width: 0; background: #1a1a1a; color: #eee; border: 1px solid #333;
+    border-radius: 8px; padding: 8px; font: inherit; font-size: 15px; color-scheme: dark; }
+  button.b.rojo { background: #3a1416; color: #ff8a8f; }
+  .zonas-cam { padding: 4px 0 8px; }
+  .zonas-cam + .zonas-cam { border-top: 1px solid #222; padding-top: 10px; }
+  .zonas-cam .cab { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+  .zonas-cam .cab .txt { flex: 1; font-size: 15px; font-weight: 600; }
+  .zona { display: flex; align-items: center; gap: 10px; padding: 8px 10px; margin: 4px 0; background: #181818; border-radius: 10px; }
+  .zona .txt { flex: 1; font-size: 14.5px; }
+  .zona .sub { display: block; font-size: 12.5px; color: #888; margin-top: 2px; }
+  .agregar { background: none; border: 1px dashed #444; color: #aaa; border-radius: 10px; width: 100%; padding: 8px; font: inherit; font-size: 14px; margin-top: 4px; }
+  #foto { position: fixed; inset: 0; background: #000e; z-index: 30; display: none; align-items: center; justify-content: center; }
+  #foto.abierto { display: flex; }
+  #foto img { width: 100%; }
+  #error { margin: 14px 12px; color: #e5484d; display: none; }
+</style>
+</head>
+<body>
+<header>
+  <a href="./">← En vivo</a>
+  <h1>Avisos</h1>
+</header>
+<div id="error"></div>
+
+<section>
+  <h2>Este celu</h2>
+  <div class="fila">
+    <span class="txt" id="celuTxt">Revisando…</span>
+    <button class="b" id="celuBtn" hidden>Activar</button>
+  </div>
+  <div class="fila" id="celuMas" hidden>
+    <span class="txt">Mandar un aviso de prueba</span>
+    <button class="b gris" id="probar">Probar</button>
+  </div>
+</section>
+
+<section>
+  <h2>Cuándo avisar</h2>
+  <div class="estado" id="armado"></div>
+  <div class="seg" id="modo">
+    <button data-modo="auto">En horario</button>
+    <button data-modo="siempre">Siempre</button>
+    <button data-modo="apagado">Nunca</button>
+  </div>
+  <div class="fila" id="horario">
+    <span class="txt">Desde <input type="time" id="desde"> hasta <input type="time" id="hasta"></span>
+  </div>
+</section>
+
+<section>
+  <h2>Qué avisar</h2>
+  <div id="camaras"></div>
+  <div class="fila">
+    <span class="txt">Si una cámara se queda sin imagen<span class="sub">También avisa cuando vuelve</span></span>
+    <label class="interruptor"><input type="checkbox" id="fallas"><span></span></label>
+  </div>
+</section>
+
+<section>
+  <h2>Últimos 7 días</h2>
+  <div id="eventos"><p class="vacio">Cargando…</p></div>
+</section>
+
+<div id="editor">
+  <div class="ayuda" id="editorAyuda">Arrastrá los puntos para mover la zona. Tocá cerca de un borde para agregar un punto. Cuenta si alguien tiene <b>los pies</b> adentro.</div>
+  <div id="lienzo"><img id="editorImg" alt=""><svg viewBox="0 0 1600 900" id="editorSvg"></svg></div>
+  <div class="botones">
+    <button class="b gris" id="zBorrarPunto" disabled>Borrar punto</button>
+    <button class="b gris" id="zTodo">Toda la imagen</button>
+  </div>
+  <div class="campos">
+    <label>Nombre <input type="text" id="zNombre" maxlength="30" placeholder="Ej: Portón"></label>
+    <label>Avisar
+      <select id="zEspera">
+        <option value="0">apenas entra alguien</option>
+        <option value="10">si alguien se queda 10 s</option>
+        <option value="15">si alguien se queda 15 s</option>
+        <option value="30">si alguien se queda 30 s</option>
+        <option value="60">si alguien se queda 1 min</option>
+      </select>
+    </label>
+    <label>Cuándo
+      <select id="zCuando">
+        <option value="horario">solo en el horario de avisos</option>
+        <option value="siempre">siempre (como un timbre)</option>
+      </select>
+    </label>
+  </div>
+  <div class="botones">
+    <button class="b rojo" id="zEliminar">Borrar zona</button>
+    <div class="der">
+      <button class="b gris" id="zCancelar">Cancelar</button>
+      <button class="b" id="zGuardar">Guardar</button>
+    </div>
+  </div>
+</div>
+<div id="foto"><img alt=""></div>
+
+<script type="module" src="avisos.js?v=6"></script>
+</body>
+</html>

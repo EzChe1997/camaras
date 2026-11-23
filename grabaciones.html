@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Grabaciones</title>
+<link rel="manifest" href="manifest.json?v=3">
+<link rel="icon" href="icono-192.png">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #000; color: #eee; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent; }
+  body { padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); min-height: 100dvh; }
+
+  header { position: sticky; top: 0; z-index: 5; background: #000; display: flex; align-items: center;
+    gap: 8px; padding: 10px 12px; border-bottom: 1px solid #222; }
+  header a { color: #eee; text-decoration: none; font-size: 15px; padding: 6px 8px; border-radius: 8px; }
+  header a:active { background: #222; }
+  .pestanas { margin-left: auto; display: flex; background: #1a1a1a; border-radius: 10px; padding: 3px; }
+  .pestanas button { background: none; border: 0; color: #aaa; font: inherit; font-size: 14px;
+    padding: 6px 14px; border-radius: 8px; }
+  .pestanas button.activa { background: #333; color: #fff; }
+
+  #visor { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #111; }
+  /* El DVR graba 944x1080 aplastado: se estira a 16:9 como en vivo */
+  #visor cam-player { display: block; width: 100%; height: 100%; }
+  #visor video { width: 100%; height: 100%; object-fit: fill; display: block; background: #000; }
+  #visor .vacio { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: #888; font-size: 15px; text-align: center; padding: 16px; }
+  #pc { position: absolute; top: 8px; right: 8px; background: #0008; color: #fff; border: 0; border-radius: 8px;
+    font-size: 18px; width: 38px; height: 34px; }
+  #visor:fullscreen { aspect-ratio: auto; width: 100vw; height: 100vh; display: flex; align-items: center; }
+  #visor:fullscreen video { aspect-ratio: 16 / 9; height: auto; max-height: 100vh; }
+  #controles { display: flex; align-items: center; gap: 6px; padding: 8px 10px 0; }
+  #controles button { background: #1a1a1a; color: #eee; border: 1px solid #2a2a2a; border-radius: 8px; font: inherit;
+    font-size: 14px; min-width: 44px; height: 36px; font-variant-numeric: tabular-nums; }
+  #cBarra { flex: 1; min-width: 0; accent-color: #1f6feb; height: 28px; }
+  #cTiempo { font-size: 12.5px; color: #aaa; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  #rotulo { padding: 8px 14px; font-size: 14px; color: #aaa; min-height: 34px; }
+
+  #lista { padding: 4px 12px 24px; }
+  #lista h2 { font-size: 14px; font-weight: 600; color: #ccc; margin: 16px 2px 8px; text-transform: capitalize; }
+  .horas { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
+  .horas button { background: #1a1a1a; color: #ddd; border: 1px solid #262626; border-radius: 8px;
+    font: inherit; font-size: 14px; padding: 9px 0; font-variant-numeric: tabular-nums; }
+  .horas button.sel { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+  .horas button.encurso { border-color: #b42318; color: #888; position: relative; }
+  .horas button.encurso::after { content: "grabando"; display: block; font-size: 10px; color: #e5484d; }
+  #velocidad { padding: 0 14px; font-size: 13px; color: #f5a623; min-height: 0; }
+  .horas button.evento { border-color: #f5a623; }
+  .horas button.evento::after { content: "persona"; display: block; font-size: 10px; color: #f5a623; }
+  .horas button.sel.evento::after { color: #fff; }
+  #error { padding: 24px 16px; color: #e5484d; display: none; }
+</style>
+</head>
+<body>
+<header>
+  <a href="./">← En vivo</a>
+  <div class="pestanas" id="pestanas"></div>
+</header>
+<div id="visor">
+  <video id="video" controls playsinline preload="metadata"></video>
+  <div class="vacio" id="vacio">Elegí un horario de la lista</div>
+  <button id="pc" title="Pantalla completa">⛶</button>
+</div>
+<div id="rotulo"></div>
+<div id="error"></div>
+<div id="lista"></div>
+<script type="module" src="grabaciones.js?v=14"></script>
+</body>
+</html>
